@@ -166,7 +166,12 @@ class APIController extends Controller
 
     private function textTypeReply($text, $customer, $status)
     {
-        switch ($status) {
+        if($text === 'restart')
+        {
+            $categoryTemplate = $this->getCategoriesTemplate();
+            return $this->api_chatbot_universal_gateway($categoryTemplate, $customer, 'text', 'wt-category');
+        }
+        switch ($status) {                
             case 'wt-category':
                 try {
                     $message = $this->checkAndGetCategoryBrands($text);
@@ -191,7 +196,7 @@ class APIController extends Controller
 
     private function getCategoriesTemplate($start=0)
     {
-        $message ='*Here are some of our categories*\n';
+        $message ="*Here are some of our categories*\n";
         $categories = Category::all();
         foreach ($categories as $category) {
             $message .= "*$category->name*\n";
