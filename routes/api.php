@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
+use App\Models\Customer;
+use App\Http\Controllers\API\APIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +19,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('/customer', [ APIController::class, 'index']);
+Route::post('/customer/otp/{phone}', function (Request $request, String $phone) {
+    if ($request->input('verification')) {
+        //
+        $customer = Customer::where([['phone_number', $phone],['customer_id', $request->input('verification')]])->first();
+        $customer->is_verified = true;
+        $customer->save();
+        return response()->json($customer, 200); 
+    }
+    return response()->json(array(error=>'Please enter number'), 404);
 });

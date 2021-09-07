@@ -12,6 +12,7 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'logo',
+        'order'
     ];
 
     /**
@@ -19,9 +20,9 @@ class Brand extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function product()
+    public function products()
     {
-        return $this->hasMany(Product::class, 'products_id');
+        return $this->hasMany(Product::class, 'brands_id');
     }
 
     /**

@@ -14,6 +14,8 @@ class Product extends Model
         'description',
         'price',
         'quantity',
+        'brands_id',
+        'order'
     ];
 
     /**

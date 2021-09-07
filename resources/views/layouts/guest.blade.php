@@ -21,7 +21,6 @@
             border-width: 0 0.1em 0.1em 0;
             transform: rotate(45deg) translateY(0.5rem);
         }
-
         .btn.dropdown-toggle:focus {
             outline: none !important;
         }
@@ -30,21 +29,17 @@
             padding-left: 0;
             margin-bottom: 0
         }
-
         li {
             display: block;
             float: left;
             margin-right: 6px;
             cursor: pointer
         }
-
         img {
             display: block;
             height: auto;
             width: 100%
         }
-
-
         .social-link {
             width: 30px;
             height: 30px;
@@ -57,13 +52,11 @@
             transition: all 0.3s;
             font-size: 0.9rem;
         }
-
         .social-link:hover, .social-link:focus {
             background: #ddd;
             text-decoration: none;
             color: #555;
         }
-
         .progress {
             height: 10px;
         }

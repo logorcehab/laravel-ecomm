@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Controller;
 
 
 /*
@@ -16,12 +17,10 @@ use App\Http\Controllers\ProductController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-    return view('landing');
-});
-
 require __DIR__.'/auth.php';
+// require __DIR__.'./customer/customer.php';
+
+Route::get('/',[Controller::class,'home'])->name('landing');
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/', [ProductController::class, 'index'])

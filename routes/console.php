@@ -23,20 +23,23 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('gen:fake', function () {
-    for ($i=0; $i <20 ; $i++) { 
-        $categories = Category::factory()
-            ->count(random_int(1,3))
-            ->create();
-        $brands = Brand::factory()
-            ->hasAttached($categories)
-            ->create();
-        $products = Product::factory()
-            ->hasAttached($categories)
-            ->for($brands, 'brands')
-            ->create();
+    $brands = Brand::factory()
+        ->create();
+    $products = Product::factory()
+        ->count(random_int(2,4))
+        ->for($brands, 'brands')
+        ->create();
+    $categories = Category::factory()
+        ->hasAttached($products)
+        ->hasAttached($brands)
+        ->count(random_int(2,4))
+        ->create();
+    foreach ($products as $key => $product)
+    {
         $images = ProductImage::factory()
             ->count(random_int(1,5))
-            ->for($products ,'products')
+            ->for($product ,'products')
             ->create();
     }
+    
 });

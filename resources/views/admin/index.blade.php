@@ -4,6 +4,7 @@
             {{ __('Products') }}
         </h2>
     </x-slot>
+    {{-- // TODO allow user to set heading slider --}}
     <div class="row py-5">
       <div class="col-lg-10 mx-auto">
         <div class="card rounded shadow border-0">
@@ -12,19 +13,19 @@
             <button type="button" class="btn btn-secondary ml-4"
               data-toggle="modal"
               data-target="#addProductsModal" 
-              data-whatever="">
+            >
               <i class="fa fa-plus">&nbsp;Add Product</i>
             </button>
             <button type="button" class="btn btn-secondary ml-4"
               data-toggle="modal"
               data-target="#addCategoriesModal" 
-              data-whatever="">
+            >
               <i class="fa fa-plus">&nbsp;Add Category</i>
             </button>
             <button type="button" class="btn btn-secondary ml-4"
               data-toggle="modal"
               data-target="#addBrandsModal" 
-              data-whatever="">
+            >
               <i class="fa fa-plus">&nbsp;Add Brand</i>
             </button>
           </div>
@@ -172,11 +173,11 @@
                 <div class="row">
                   <div class="col-md-3">
                       <x-label for="price" :value="__('Price')" />
-                      <x-input id="price" class="block  w-full" type="number" name="price" :value="old('price')"/>
+                      <x-input id="price" class="block  w-full" type="number" name="price" :value="old('price')" required/>
                   </div>
                   <div class="col-md-3">
                       <x-label for="quantity" :value="__('Quantity')" />
-                      <x-input id="quantity" class="block  w-full" type="number" name="quantity" :value="old('quantity')"/>
+                      <x-input id="quantity" class="block  w-full" type="number" name="quantity" :value="old('quantity')" required/>
                   </div>
                 </div>
                 <div id="brand_wrapper" class="row p-2">
@@ -190,7 +191,7 @@
                 </div>
                 <div id="category_wrapper" class="row p-2">
                     <x-label for="categories" :value="__('Category')" />
-                    <select multiple="" data-style="block mt-1 w-full" name="categories[]" class="form-control selectpicker w-100">
+                    <select multiple data-style="block mt-1 w-full" name="categories[]" class="form-control w-100">
                         @foreach ($categories as $category)
                             <option value="{{$category->name}}">{{$category->name}}</option>
                         @endforeach
@@ -454,7 +455,6 @@
 
     modal.find('#delete_form').attr('action', productRoute)
     modal.find('#delete_product_name').text(productName)
-    console.log(modal.attr('action'))
   });
   $('#editProductModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) 
@@ -492,10 +492,10 @@
     modal.find('#edit_description').attr('placeholder', button.data('product_description'))
     modal.find('#edit_price').attr('placeholder', button.data('product_price'))
     modal.find('#edit_quantity').attr('placeholder', button.data('product_quantity'))
-
+    modal.find('#edit_form').attr('action', button.data('product_action'))
+    console.log(button.data('product_action'))
 
     modal.find('#mltislct').empty()
-    console.log(modal.find('#edit_categories'))
     modal.find('#mltislct').append(categoriesOptionsHtml)
     $('#mltislct').multiselect({
       includeSelectAllOption: true,

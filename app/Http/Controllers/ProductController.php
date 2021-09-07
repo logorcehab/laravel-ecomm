@@ -98,7 +98,7 @@ class ProductController extends Controller
             'price' => $request->input('price'),
             'brands_id' => $brand->id,
         ]);
-        $product->brands()->attatch(Brand::where('name',$brand)->first());
+        $product->brands()->associate(Brand::where('name',$brand)->first());
 
         foreach ($request->photos as $photo) {
             $filename = $photo->store('public/photos');
