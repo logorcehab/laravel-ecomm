@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Category;
 use App\Models\Brand;
-use App\Models\MessageResponse;
 use DateTime;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +54,7 @@ class APIController extends Controller
         }
         return response()->json($payload, 200);
     }
-    private function api_chatbot_universal_gateway($postdata,$customer,$type, $status)
+    private function api_chatbot_universal_gateway($postdata,$customer,$type, $status, $text = '')
     {
         $body = [
             "apikey" =>"c9b0dd70-b0ff-4ce8-9c9d-a3bbb2947fe5",
@@ -142,7 +141,8 @@ class APIController extends Controller
             // }
             $customer->responses()->create([
                 'type' => $type,
-                'status' => $status
+                'status' => $status,
+                'text' => $text
             ]);
             return response()->json($body, 200);
         }else{
@@ -156,7 +156,7 @@ class APIController extends Controller
         switch ($lastRes->type)
         {
             case 'text':
-                return $this->textTypeReply($text, $customer, $lastRes->status);
+            return $this->textTypeReply($text, $customer, $lastRes->status, /**$lastRes->text*/ 'phone');
                 break;
             default:
                 # code...
@@ -164,9 +164,9 @@ class APIController extends Controller
         }
     }
 
-    private function textTypeReply($text, $customer, $status)
+    private function textTypeReply($text, $customer, $status, $reqText)
     {
-        if($text === 'restart')
+        if(strtolower($text) == 'restart')
         {
             $categoryTemplate = $this->getCategoriesTemplate();
             return $this->api_chatbot_universal_gateway($categoryTemplate, $customer, 'text', 'wt-category');
@@ -175,17 +175,18 @@ class APIController extends Controller
             case 'wt-category':
                 try {
                     $message = $this->checkAndGetCategoryBrands($text);
-                    return $this->api_chatbot_universal_gateway($message, $customer, 'text', 'wt-brand');
+                    return $this->api_chatbot_universal_gateway($message, $customer, 'text', 'wt-brand',$text);
                 } catch (\Throwable $th) {
                     return $this->api_chatbot_universal_gateway("Sorry Cannot find brand $text", $customer, 'text', 'wt-category');
                 }
                 break;
             case 'wt-brand':
                 try {
-                    $message = $this->checkAndGetBrandProducts($text);
-                    return $this->api_chatbot_universal_gateway($message, $customer, 'text', 'wt-product');
+                    $message = $this->checkAndGetBrandProducts($text,$reqText);
+                    return $this->api_chatbot_universal_gateway($message, $customer, 'text', 'wt-product', $text);
                 } catch (\Throwable $th) {
-                    return $this->api_chatbot_universal_gateway("Sorry Cannot find product $text", $customer, 'text', 'wt-brand');
+                    // return $this->api_chatbot_universal_gateway("Sorry Cannot find product $text", $customer, 'text', 'wt-brand');
+                    throw $th;
                 }
                 break;
             default:
@@ -225,19 +226,33 @@ class APIController extends Controller
         return $message;
         
     }
-    private function checkAndGetBrandProducts($text)
+    private function checkAndGetBrandProducts($text, $reqText)
     {
 
 
-        $QUERY = "SELECT * FROM brands WHERE SIMILARITY(name, '$text') > 0.3 limit 6";
+        $QUERY_BRAND = "SELECT * FROM brands WHERE SIMILARITY(name, '$text') > 0.3 limit 6";
+        $QUERY_CATEGORY = "SELECT * FROM categories WHERE SIMILARITY(name, '$reqText') > 0.1 limit 6";
         
         try {
-            $brandQuery = DB::select($QUERY)[0];
+            $brandQuery = DB::select($QUERY_BRAND)[0];
         } catch (\Throwable $th) {
             throw $th;
         }
-        $message ="*Here are our $brandQuery->name brands*\n";
-        $products = Brand::where('name', $brandQuery->name)->first()->products;
+        $categoryQuery = DB::select($QUERY_CATEGORY)[0];
+        $message ="*Here are our $brandQuery->name $categoryQuery->name brands*\n";
+        $productsUnFiltered = Brand::where('name', $brandQuery->name)->first()->products()->get();
+        $products = [];
+        foreach ($productsUnFiltered as $product) {
+            if($product->categories->where('id',$categoryQuery->id)->first())
+            {
+                if(
+                    $product->brands_id === $brandQuery->id && 
+                    $product->categories->where('id',$categoryQuery->id)->first()->id === $categoryQuery->id
+                ){ 
+                    array_push($products, $product);
+                }
+            }
+        }
         foreach ($products as $product) {
             $message .= "*$product->name*\n";
         }
